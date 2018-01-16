@@ -1,18 +1,15 @@
-import csv
 import json
+import numpy
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.feature_extraction.text import TfidfTransformer
+from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.pipeline import Pipeline
 from sklearn.linear_model import SGDClassifier
+from sklearn.decomposition import LatentDirichletAllocation
 from sklearn import metrics
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
-
-
-def read(filename):
-    with open(filename, "r") as csv_file:
-        reader = csv.reader(csv_file, delimiter=",")
-        return [row for row in reader]
+from questions import Questions
 
 
 def fit(classifier, texts, tags):
@@ -30,6 +27,18 @@ def fit(classifier, texts, tags):
     print(metrics.classification_report(test_tags, predicted))
 
 
+def print_top_words(model, feature_names, n_top_words, topics):
+    for topic_idx, topic in enumerate(model.components_):
+        match = []
+        for key, value in topics.items():
+            if value == topic_idx:
+                match.append(key)
+        print("---> Topic #" + str(topic_idx) + ": " + ", ".join(match))
+        print(" ".join([feature_names[i]
+                        for i in topic.argsort()[:-n_top_words - 1:-1]]))
+    print()
+
+
 def classify(texts, tags):
     fit(MultinomialNB(), texts, tags)
     fit(SGDClassifier(loss='hinge', penalty='l2', alpha=1e-3,
@@ -39,50 +48,79 @@ def classify(texts, tags):
 def sentiment(texts):
     analyzer = SentimentIntensityAnalyzer()
 
-    i = 0
-    compound = 0
-    neu = 0
-    neg = 0
-    pos = 0
+    count = len(texts)
+    compound, neutral, negative, positive = 0, 0, 0, 0
 
     for text in texts:
         score = analyzer.polarity_scores(text)
-        i += 1
         compound += score['compound']
-        neu += score['neu']
-        neg += score['neg']
-        pos += score['pos']
+        neutral += score['neu']
+        negative += score['neg']
+        positive += score['pos']
 
-    return {'compound': compound / i, 'neutral': neu / i,
-            'negative': neg / i, 'positive': pos / i}
-
-
-def language_filter(questions, language):
-    return list(filter(lambda question:
-                       question[2] == language, questions))
-
-
-def texts(questions):
-    return list(map(lambda question: question[3], questions))
-
-
-def tags(questions):
-    return list(map(lambda question: question[2], questions))
+    return {'compound': compound / count, 'neutral': neutral / count,
+            'negative': negative / count, 'positive': positive / count}
 
 
 def languages_sentiment(questions, languages):
     for language in languages:
-        lang_questions = language_filter(questions, language)
-        texts = list(map(lambda question: question[3], lang_questions))
+        texts = questions.for_language(language).texts()
         print("{0}: {1}".format(language, sentiment(texts)))
 
 
-# languages = json.loads(open("../languages.json", "r").read())
-questions = read("../language_questions.csv")
+N_COMPONENTS = 16
 
-texts = texts(questions)
-tags = tags(questions)
 
-classify(texts, tags)
+def lda(questions, languages):
+    topics = {}
+
+    for language in languages:
+        topics[language] = {}
+        for i in range(0, N_COMPONENTS):
+            topics[language][i] = 0
+
+    tfidf_vectorizer = TfidfVectorizer(max_df=0.95, min_df=2,
+                                       max_features=1000,
+                                       stop_words='english')
+    tfidf = tfidf_vectorizer.fit_transform(questions.texts())
+    lda = LatentDirichletAllocation(n_components=N_COMPONENTS, max_iter=5,
+                                    learning_method='online',
+                                    learning_offset=50.,
+                                    random_state=0, verbose=1)
+    lda.fit(tfidf)
+    tfidf_feature_names = tfidf_vectorizer.get_feature_names()
+
+    tags = questions.tags()
+
+    i = 0
+    for row in lda.transform(tfidf):
+        topics[tags[i]][numpy.argmax(row)] += 1
+        i += 1
+
+    counts = {}
+    for i in range(0, N_COMPONENTS):
+        counts[i] = 0
+        for topic in topics.values():
+            counts[i] += topic[i]
+
+    for value in topics.values():
+        for i in value:
+            if value[i] > 0:
+                value[i] = value[i] / counts[i]
+
+    print(topics)
+    final_topics = {}
+    for key, value in topics.items():
+        final_topics[key] = int(numpy.argmax(list(value.values())))
+
+    print_top_words(lda, tfidf_feature_names, 20, final_topics)
+
+
+languages = json.loads(open("../languages.json", "r").read())
+questions = Questions()
+
+# classify(questions.texts(), questions.tags())
 
 # languages_sentiment(questions, languages)
+
+lda(questions, languages)
