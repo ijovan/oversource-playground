@@ -6,7 +6,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.pipeline import Pipeline
 from sklearn.linear_model import SGDClassifier
-from sklearn.decomposition import LatentDirichletAllocation
+from sklearn.decomposition import NMF, LatentDirichletAllocation
 from sklearn import metrics
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 from sklearn.model_selection import train_test_split
@@ -45,6 +45,19 @@ def classify(texts, tags):
                       random_state=42, max_iter=5, tol=None), texts, tags)
 
 
+def find_topics(questions, languages):
+    decompose(questions, languages,
+              LatentDirichletAllocation(n_components=N_COMPONENTS,
+                                        max_iter=10,
+                                        learning_method='online',
+                                        learning_offset=50,
+                                        random_state=0, verbose=1))
+    decompose(questions, languages,
+              NMF(n_components=N_COMPONENTS, random_state=1,
+                  beta_loss='kullback-leibler', solver='mu',
+                  max_iter=1000, alpha=.1, l1_ratio=.5, verbose=1))
+
+
 def sentiment(texts):
     analyzer = SentimentIntensityAnalyzer()
 
@@ -71,7 +84,7 @@ def languages_sentiment(questions, languages):
 N_COMPONENTS = 20
 
 
-def lda(questions, languages):
+def decompose(questions, languages, algorithm):
     topics = {}
 
     for language in languages:
@@ -83,18 +96,13 @@ def lda(questions, languages):
                                        max_features=2000,
                                        stop_words='english')
     tfidf = tfidf_vectorizer.fit_transform(questions.texts())
-    lda = LatentDirichletAllocation(n_components=N_COMPONENTS,
-                                    max_iter=10,
-                                    learning_method='online',
-                                    learning_offset=50.,
-                                    random_state=0, verbose=1)
-    lda.fit(tfidf)
+    algorithm.fit(tfidf)
     tfidf_feature_names = tfidf_vectorizer.get_feature_names()
 
     tags = questions.tags()
 
     i = 0
-    for row in lda.transform(tfidf):
+    for row in algorithm.transform(tfidf):
         topics[tags[i]][numpy.argmax(row)] += 1
         i += 1
 
@@ -113,7 +121,7 @@ def lda(questions, languages):
     for key, value in topics.items():
         final_topics[key] = int(numpy.argmax(list(value.values())))
 
-    print_top_words(lda, tfidf_feature_names, 15, final_topics)
+    print_top_words(algorithm, tfidf_feature_names, 15, final_topics)
 
 
 LIMIT = 800
@@ -139,4 +147,4 @@ questions = Questions()
 
 # languages_sentiment(questions, languages)
 
-lda(questions, languages)
+find_topics(questions, languages)
