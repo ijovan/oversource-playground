@@ -1,4 +1,5 @@
 import csv
+import codecs
 
 
 class Questions:
@@ -6,9 +7,8 @@ class Questions:
 
     def __init__(self, items=None):
         if items is None:
-            with open(self.PATH, "r") as csv_file:
-                reader = csv.reader(csv_file, delimiter=",")
-                self.items = [row for row in reader]
+            reader = csv.reader(codecs.open(self.PATH, 'rU', 'utf-8'))
+            self.items = [row for row in reader]
         else:
             self.items = items
 

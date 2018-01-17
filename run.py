@@ -33,9 +33,10 @@ def print_top_words(model, feature_names, n_top_words, topics):
         for key, value in topics.items():
             if value == topic_idx:
                 match.append(key)
-        print("---> Topic #" + str(topic_idx) + ": " + ", ".join(match))
-        print(", ".join([feature_names[i]
-                         for i in topic.argsort()[:-n_top_words - 1:-1]]))
+        if match != []:
+            print("---> Topic #" + str(topic_idx) + ": " + ", ".join(match))
+            print(", ".join([feature_names[i]
+                            for i in topic.argsort()[:-n_top_words - 1:-1]]))
     print()
 
 
@@ -52,10 +53,10 @@ def find_topics(questions, languages):
                                         learning_method='online',
                                         learning_offset=50,
                                         random_state=0, verbose=1))
-    decompose(questions, languages,
-              NMF(n_components=N_COMPONENTS, random_state=1,
-                  beta_loss='kullback-leibler', solver='mu',
-                  max_iter=1000, alpha=.1, l1_ratio=.5, verbose=1))
+    # decompose(questions, languages,
+    #           NMF(n_components=N_COMPONENTS, random_state=1,
+    #               beta_loss='kullback-leibler', solver='mu',
+    #               max_iter=1000, alpha=.1, l1_ratio=.5, verbose=1))
 
 
 def sentiment(texts):
@@ -115,7 +116,10 @@ def decompose(questions, languages, algorithm):
     for value in topics.values():
         for i in value:
             if value[i] > 0:
-                value[i] = value[i] / counts[i]
+                if counts[i] / len(topics.items()) > 0.5 / N_COMPONENTS:
+                    value[i] = value[i] / counts[i]
+                else:
+                    value[i] = 0
 
     final_topics = {}
     for key, value in topics.items():
@@ -141,10 +145,8 @@ questions = Questions()
 
 ######################################################################
 
-# classify(questions.texts(), questions.tags())
-
-# classify_even(questions, languages)
+classify(questions.texts(), questions.tags())
 
 # languages_sentiment(questions, languages)
 
-find_topics(questions, languages)
+# find_topics(questions, languages)
