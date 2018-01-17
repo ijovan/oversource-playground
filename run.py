@@ -18,7 +18,7 @@ from questions import Questions
 
 def fit(classifier, texts, tags):
     train_texts, test_texts, train_tags, test_tags = \
-            train_test_split(texts, tags, test_size=0.8)
+            train_test_split(texts, tags, test_size=0.2)
 
     clf = Pipeline([('vect', CountVectorizer(ngram_range=(1, 2),
                                              stop_words='english')),
