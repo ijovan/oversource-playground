@@ -1,5 +1,8 @@
 import json
-import numpy
+import numpy as np
+import pandas as pd
+import matplotlib.pylab as plt
+from matplotlib.pylab import rcParams
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.feature_extraction.text import TfidfTransformer
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -104,7 +107,7 @@ def decompose(questions, languages, algorithm):
 
     i = 0
     for row in algorithm.transform(tfidf):
-        topics[tags[i]][numpy.argmax(row)] += 1
+        topics[tags[i]][np.argmax(row)] += 1
         i += 1
 
     counts = {}
@@ -123,7 +126,7 @@ def decompose(questions, languages, algorithm):
 
     final_topics = {}
     for key, value in topics.items():
-        final_topics[key] = int(numpy.argmax(list(value.values())))
+        final_topics[key] = int(np.argmax(list(value.values())))
 
     print_top_words(algorithm, tfidf_feature_names, 15, final_topics)
 
@@ -140,6 +143,34 @@ def classify_even(questions, languages):
     classify(texts, tags)
 
 
+def dateparse(stamp):
+    return pd.datetime.fromtimestamp(float(stamp)).date()
+
+
+def time_series():
+    rcParams['figure.figsize'] = 15, 6
+
+    questions = pd.read_csv('../ts.csv', delimiter=',', parse_dates=True,
+                            date_parser=dateparse, index_col='created_at',
+                            names=['created_at', 'comment_count'],
+                            header=None)
+
+    questions = questions['2013':'2017'].sort_index()
+    questions = \
+        questions.groupby(lambda x: x)['comment_count'].agg(['sum'])
+
+    ts = questions['sum']
+
+    rolmean = pd.rolling_mean(ts, window=12)
+    rolstd = pd.rolling_std(ts, window=12)
+
+    plt.plot(ts, color='blue', label='Original')
+    plt.plot(rolmean, color='red', label='Rolling Mean')
+    plt.plot(rolstd, color='black', label='Rolling Std')
+    plt.legend(loc='best')
+    plt.show()
+
+
 languages = json.loads(open("../languages.json", "r").read())
 questions = Questions()
 
@@ -150,3 +181,5 @@ classify(questions.texts(), questions.tags())
 # languages_sentiment(questions, languages)
 
 # find_topics(questions, languages)
+
+# time_series()
