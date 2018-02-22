@@ -1,5 +1,6 @@
 import csv
 import codecs
+import random
 
 
 class Questions:
@@ -22,3 +23,9 @@ class Questions:
 
     def tags(self):
         return list(map(lambda question: question[2], self.items))
+
+    def shuffle(self):
+        random.shuffle(self.items)
+
+    def cut(self, limit):
+        self.items = self.items[:limit]
