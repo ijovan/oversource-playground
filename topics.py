@@ -30,9 +30,10 @@ def decompose(questions, languages, algorithm):
         for i in range(0, N_COMPONENTS):
             topics[language][i] = 0
 
-    tfidf_vectorizer = TfidfVectorizer(max_df=0.95, min_df=2,
-                                       max_features=2000,
-                                       stop_words='english')
+    tfidf_vectorizer = TfidfVectorizer(
+        max_features=3000, ngram_range=(1, 1), stop_words='english',
+        analyzer="word", min_df=1e-4,
+        token_pattern="[!~][=]{1,2}|[:\-\+]{2}|[{}$@]|[()/]{2}|[A-Za-z]+")
     tfidf = tfidf_vectorizer.fit_transform(questions.texts())
     algorithm.fit(tfidf)
     tfidf_feature_names = tfidf_vectorizer.get_feature_names()

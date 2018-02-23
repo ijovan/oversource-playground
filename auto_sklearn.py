@@ -22,7 +22,6 @@ def classify(texts, tags):
 
 
 questions = Questions()
-questions.shuffle()
 questions.cut(1000)
 
 classify(questions.texts(), questions.tags())
