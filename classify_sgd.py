@@ -2,6 +2,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import SGDClassifier
 from questions import Questions
+from sklearn.externals import joblib
 from sklearn.model_selection import train_test_split
 from sklearn import metrics
 
@@ -34,6 +35,8 @@ train_texts, test_texts, train_tags, test_tags = train_test_split(
 # Training and prediction
 
 pipeline.fit(train_texts, train_tags)
+
+joblib.dump(pipeline, 'classifier.pkl')
 
 predicted_tags = pipeline.predict(test_texts)
 
