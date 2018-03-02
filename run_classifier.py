@@ -5,4 +5,4 @@ with open('example.txt', 'r') as myfile:
 
 pipeline = joblib.load('classifier.pkl')
 
-print(pipeline.predict([text]))
+print(pipeline.predict([text])[0])

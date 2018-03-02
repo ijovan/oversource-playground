@@ -26,7 +26,6 @@ pipeline = Pipeline([
 # Loading the data set
 
 questions = Questions()
-questions.cut(100000)
 
 train_texts, test_texts, train_tags, test_tags = train_test_split(
     questions.texts(), questions.tags(), test_size=0.35
