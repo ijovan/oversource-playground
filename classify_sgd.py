@@ -15,7 +15,7 @@ vectorizer = TfidfVectorizer(
 )
 
 classifier = SGDClassifier(
-    loss='hinge', penalty='l2', verbose=True, random_state=42,
+    loss='hinge', penalty='l2', random_state=42,
     max_iter=10, n_jobs=4, alpha=1e-5
 )
 
