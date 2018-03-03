@@ -33,7 +33,7 @@ def decompose(questions, languages, algorithm):
     tfidf_vectorizer = TfidfVectorizer(
         max_features=3000, ngram_range=(1, 1), stop_words='english',
         analyzer="word", min_df=1e-4,
-        token_pattern="[!~][=]{1,2}|[:\-\+]{2}|[{}$@]|[()/]{2}|[A-Za-z]+")
+        token_pattern="c[#\+]{1,2}|[!~][=]{1,2}|[:\-\+]{2}|[{}$@]|[()/]{2}|[A-Za-z]+")
     tfidf = tfidf_vectorizer.fit_transform(questions.texts())
     algorithm.fit(tfidf)
     tfidf_feature_names = tfidf_vectorizer.get_feature_names()
@@ -69,7 +69,7 @@ def decompose(questions, languages, algorithm):
 def find_topics(questions, languages):
     decompose(questions, languages,
               LatentDirichletAllocation(n_components=N_COMPONENTS,
-                                        max_iter=10,
+                                        max_iter=2,
                                         learning_method='online',
                                         learning_offset=50,
                                         random_state=0, verbose=1))
