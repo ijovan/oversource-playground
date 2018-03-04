@@ -4,7 +4,7 @@ import random
 
 
 class Questions:
-    PATH = "../language_questions.csv"
+    PATH = "questions.csv"
 
     def __init__(self, items=None):
         if items is None:

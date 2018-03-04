@@ -1,8 +1,9 @@
-from sklearn.externals import joblib
+from regular_classifier import RegularClassifier
 
 with open('example.txt', 'r') as myfile:
     text = myfile.read().replace('\n', ' ')
 
-pipeline = joblib.load('classifier.pkl')
+classifier = RegularClassifier()
+classifier.load()
 
-print(pipeline.predict([text])[0])
+print(classifier.predict([text])[0])

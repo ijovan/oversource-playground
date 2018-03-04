@@ -5,35 +5,18 @@ from sklearn.model_selection import GridSearchCV
 from questions import Questions
 
 
-# Setting up the pipeline
-
-vectorizer = TfidfVectorizer(
-    ngram_range=(1, 2), analyzer="word", stop_words='english'
-)
-
-classifier = SGDClassifier(
-    verbose=True, random_state=42, max_iter=10, n_jobs=4
-)
-
+vectorizer = TfidfVectorizer(analyzer='word', stop_words='english')
+classifier = SGDClassifier(verbose=True, max_iter=10, n_jobs=4)
 pipeline = Pipeline([('vect', vectorizer), ('clf', classifier)])
 
-# Setting up the grid
-
-grid_parameters = {
-    'clf__alpha': [1e-2, 1e-3, 1e-4, 1e-5, 1e-6]
-}
-
-gscv = GridSearchCV(pipeline, grid_parameters, n_jobs=4, verbose=True)
-
-# Loading the data set
+grid_parameters = {'clf__alpha': [1e-2, 1e-3, 1e-4, 1e-5, 1e-6]}
+grid = GridSearchCV(pipeline, grid_parameters, n_jobs=4, verbose=True)
 
 questions = Questions()
 questions.cut(20000)
 
-# Training
+grid.fit(questions.texts(), questions.tags())
 
-gscv.fit(questions.texts(), questions.tags())
-
-print(gscv.cv_results_)
-print(gscv.best_score_)
-print(gscv.best_params_)
+print(grid.cv_results_)
+print(grid.best_score_)
+print(grid.best_params_)

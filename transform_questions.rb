@@ -3,8 +3,8 @@ require "json"
 
 QUESTION_LIMIT = 100_000
 
-language_tags = JSON.parse File.read("../languages.json")
-questions = CSV.read "../Pop/output/questions.csv"
+language_tags = JSON.parse File.read("languages.json")
+questions = CSV.read "raw_questions.csv"
 
 questions.shift
 
@@ -21,6 +21,6 @@ questions.shuffle!
 
 questions = questions.first(QUESTION_LIMIT)
 
-CSV.open("../language_questions.csv", "w") do |csv|
+CSV.open("questions.csv", "w") do |csv|
   questions.each { |question| csv << question }
 end

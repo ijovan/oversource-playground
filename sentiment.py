@@ -26,7 +26,7 @@ def sentiment(texts):
             'negative': negative / count, 'positive': positive / count}
 
 
-languages = json.loads(open("../languages.json", "r").read())
+languages = json.loads(open("languages.json", "r").read())
 questions = Questions()
 
 languages_sentiment(questions, languages)

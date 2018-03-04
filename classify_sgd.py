@@ -1,42 +1,34 @@
-from sklearn.pipeline import Pipeline
+from questions import Questions
+from regular_classifier import RegularClassifier
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import SGDClassifier
-from questions import Questions
-from sklearn.externals import joblib
-from sklearn.model_selection import train_test_split
-from sklearn import metrics
 
 
-# Setting up the pipeline
+TRAIN_SIZE = 0.65
+
+NGRAM_RANGE = (1, 2)
+MIN_DF = 1e-4
+TOKEN_PATTERN = \
+    '[><=!~:\-\+]{1,3}|[{};#$@]|[()/]{1,2}|[A-Za-z]+'
+
+LOSS = 'hinge'
+PENALTY = 'l2'
+MAX_ITER = 10
+ALPHA = 1e-5
+
 
 vectorizer = TfidfVectorizer(
-    ngram_range=(1, 2), stop_words='english', analyzer="word", min_df=1e-4,
-    token_pattern="[><=!~:\-\+]{1,3}|[{};#$@]|[()/]{1,2}|[A-Za-z]+"
+    ngram_range=NGRAM_RANGE, stop_words='english',
+    analyzer='word', min_df=MIN_DF, token_pattern=TOKEN_PATTERN
 )
 
-classifier = SGDClassifier(
-    loss='hinge', penalty='l2', random_state=42,
-    max_iter=10, n_jobs=4, alpha=1e-5
+model = SGDClassifier(
+    loss=LOSS, penalty=PENALTY, random_state=42,
+    max_iter=MAX_ITER, n_jobs=4, alpha=ALPHA
 )
-
-pipeline = Pipeline([
-    ('vectorizer', vectorizer), ('classifier', classifier)
-])
-
-# Loading the data set
 
 questions = Questions()
 
-train_texts, test_texts, train_tags, test_tags = train_test_split(
-    questions.texts(), questions.tags(), test_size=0.35
-)
-
-# Training and prediction
-
-pipeline.fit(train_texts, train_tags)
-
-joblib.dump(pipeline, 'classifier.pkl')
-
-predicted_tags = pipeline.predict(test_texts)
-
-print(metrics.classification_report(test_tags, predicted_tags))
+classifier = RegularClassifier(model, vectorizer)
+classifier.train_and_test(questions.texts(), questions.tags(), TRAIN_SIZE)
+classifier.save()
