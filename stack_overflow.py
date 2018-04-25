@@ -3,8 +3,8 @@ import codecs
 import random
 
 
-class Questions:
-    PATH = "questions.csv"
+class StackOverflow:
+    PATH = "stack_overflow.csv"
 
     def __init__(self, items=None):
         if items is None:
@@ -16,13 +16,18 @@ class Questions:
     def for_language(self, language):
         filtered = list(filter(lambda question:
                                question[2] == language, self.items))
-        return Questions(filtered)
+        return StackOverflow(filtered)
+
+    def tags(self):
+        return list(map(lambda question: question[2], self.items))
 
     def texts(self):
         return list(map(lambda question: question[3], self.items))
 
-    def tags(self):
-        return list(map(lambda question: question[2], self.items))
+    def pairs(self):
+        return list(map(lambda question:
+            [question[2], question[3]], self.items
+        ))
 
     def shuffle(self):
         random.shuffle(self.items)

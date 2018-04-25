@@ -13,6 +13,8 @@ class RegularClassifier:
                 ('vectorizer', vectorizer),
                 ('classifier', model)
             ])
+        elif model:
+            self.pipeline = Pipeline([('classifier', model)])
 
     def train(self, texts, tags):
         self.pipeline.fit(texts, tags)

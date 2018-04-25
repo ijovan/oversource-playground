@@ -1,4 +1,4 @@
-from questions import Questions
+from stack_overflow import StackOverflow
 from regular_classifier import RegularClassifier
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import SGDClassifier
@@ -23,12 +23,12 @@ vectorizer = TfidfVectorizer(
 )
 
 model = SGDClassifier(
-    loss=LOSS, penalty=PENALTY, random_state=42,
-    max_iter=MAX_ITER, n_jobs=4, alpha=ALPHA
+    loss=LOSS, penalty=PENALTY, max_iter=MAX_ITER, n_jobs=4, alpha=ALPHA
 )
+# model = MultinomialNB(alpha=1e-2)
 
-questions = Questions()
+stack_overflow = StackOverflow()
 
 classifier = RegularClassifier(model, vectorizer)
-classifier.train_and_test(questions.texts(), questions.tags(), TRAIN_SIZE)
+classifier.train_and_test(stack_overflow.texts(), stack_overflow.tags(), TRAIN_SIZE)
 classifier.save()
