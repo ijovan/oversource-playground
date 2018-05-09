@@ -2,7 +2,7 @@ import numpy
 from sklearn.model_selection import train_test_split
 from scipy.stats import multivariate_normal
 from sklearn import metrics
-from regular_classifier import RegularClassifier
+from src.regular_classifier import RegularClassifier
 
 
 class ReductionClassifier:

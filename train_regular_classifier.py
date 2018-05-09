@@ -1,5 +1,5 @@
-from stack_overflow import StackOverflow
-from regular_classifier import RegularClassifier
+from src.stack_overflow import StackOverflow
+from src.regular_classifier import RegularClassifier
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import SGDClassifier
 

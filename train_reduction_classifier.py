@@ -1,5 +1,5 @@
-from stack_overflow import StackOverflow
-from reduction_classifier import ReductionClassifier
+from src.stack_overflow import StackOverflow
+from src.reduction_classifier import ReductionClassifier
 from sklearn.decomposition import NMF
 from sklearn.linear_model import SGDClassifier
 from sklearn.feature_extraction.text import TfidfVectorizer

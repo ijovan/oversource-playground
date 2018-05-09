@@ -1,7 +1,7 @@
 import json
 import csv
 import codecs
-from stack_overflow import StackOverflow
+from src.stack_overflow import StackOverflow
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
 

@@ -1,6 +1,6 @@
 import csv
-from regular_classifier import RegularClassifier
-from hacker_news import HackerNews
+from src.regular_classifier import RegularClassifier
+from src.hacker_news import HackerNews
 
 
 classifier = RegularClassifier()

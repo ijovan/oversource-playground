@@ -2,7 +2,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import SGDClassifier
 from sklearn.model_selection import GridSearchCV
-from stack_overflow import StackOverflow
+from src.stack_overflow import StackOverflow
 
 
 vectorizer = TfidfVectorizer(analyzer='word', stop_words='english')
